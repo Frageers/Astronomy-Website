@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fun Facts · Astronomy Club</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0B0F1A;
+      --surface: #12182B;
+      --text: #E6E9F2;
+      --muted: #9AA3C7;
+      --cyan: #4FD1FF;
+      --violet: #8B5CF6;
+      --gradient: linear-gradient(135deg, var(--cyan), var(--violet));
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top:0;
+      background-color: rgba(11,15,26,0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding:1rem 1.5rem;
+      z-index:100;
+    }
+
+    .nav-container {
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .logo {
+      font-family:'Space Grotesk', sans-serif;
+      font-size:1.25rem;
+      font-weight:600;
+    }
+    .logo span {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    nav ul {
+      list-style:none;
+      display:flex;
+      gap:1rem;
+    }
+
+    nav a {
+      text-decoration:none;
+      color: var(--muted);
+      font-size:0.95rem;
+      position:relative;
+    }
+    nav a:hover { color: var(--text); }
+    nav a::after {
+      content:'';
+      position:absolute;
+      left:0;
+      bottom:-4px;
+      width:0;
+      height:2px;
+      background: var(--gradient);
+      transition: width 0.25s ease;
+    }
+    nav a:hover::after { width:100%; }
+
+    main {
+      max-width:1000px;
+      margin:2rem auto;
+      padding:0 1.5rem;
+    }
+
+    h1 {
+      font-family:'Space Grotesk', sans-serif;
+      font-size:2.3rem;
+      margin-bottom:0.5rem;
+    }
+
+    .funfact-list { margin-top:1rem; border-top:1px solid rgba(255,255,255,0.08); }
+
+    .funfact-item {
+      padding:1rem;
+      border-bottom:1px solid rgba(255,255,255,0.05);
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .funfact-item strong { font-size:1.05rem; color: var(--cyan); }
+    .funfact-item .download-btn {
+      padding:0.4rem 0.8rem;
+      background: var(--gradient);
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      text-decoration:none;
+      font-size:0.9rem;
+      transition: all 0.2s ease;
+    }
+    .funfact-item .download-btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .event-date { font-size:0.85rem; color: var(--muted); margin-top:0.25rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-container">
+    <div class="logo">Astronomy <span>Club</span></div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="calendar.html">Calendar</a></li>
+        <li><a href="fun-facts.html">Fun Facts</a></li>
+        <li><a href="resources.html">Resources</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Fun Facts</h1>
+  <p>All downloadable fun facts uploaded by the Astronomy Club. Click “Download” to get the PDF for each day’s fun fact.</p>
+
+  <div class="funfact-list">
+    <div class="funfact-item">Loading Fun Facts…</div>
+  </div>
+</main>
+
+<script>
+const ICS_LINK = "https://calendar.google.com/calendar/ical/c_8da90cdf9cf1b07e9815d4bba4e4b1f7fd75249e5cbfe10266d292d5fac6d484%40group.calendar.google.com/public/basic.ics";
+const FETCH_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS_LINK) + "&cacheBust=" + new Date().getTime();
+
+async function loadFunFacts() {
+  try {
+    const res = await fetch(FETCH_URL);
+    const text = await res.text();
+    const events = parseICS(text);
+
+    // Filter only Fun Facts
+    const funFacts = events.filter(e => e.title.startsWith("[Fun Fact]"));
+    renderFunFacts(funFacts);
+  } catch (err) {
+    console.error(err);
+    document.querySelector(".funfact-list").innerHTML = "<div class='funfact-item'>Failed to load fun facts.</div>";
+  }
+}
+
+function parseICS(data) {
+  const lines = data.split("\n");
+  const events = [];
+  let current = null;
+
+  for (let line of lines) {
+    line = line.trim();
+    if (line === "BEGIN:VEVENT") current = {};
+    if (!current) continue;
+
+    if (line.startsWith("SUMMARY:")) current.title = line.replace("SUMMARY:", "");
+    if (line.startsWith("DTSTART")) current.date = line.split(":")[1];
+    if (line.startsWith("DESCRIPTION:")) current.description = line.replace("DESCRIPTION:", "");
+    if (line === "END:VEVENT" && current) {
+      current.dateObj = new Date(
+        current.date.substring(0,4),
+        current.date.substring(4,6)-1,
+        current.date.substring(6,8)
+      );
+      events.push(current);
+      current = null;
+    }
+  }
+
+  return events;
+}
+
+function renderFunFacts(events) {
+  const container = document.querySelector(".funfact-list");
+  container.innerHTML = "";
+
+  if (events.length === 0) {
+    container.innerHTML = "<div class='funfact-item'>No Fun Facts available.</div>";
+    return;
+  }
+
+  // Sort by date ascending
+  events.sort((a,b) => a.dateObj - b.dateObj);
+
+  events.forEach(e => {
+    const item = document.createElement("div");
+    item.className = "funfact-item";
+
+    let downloadHTML = "";
+    if (e.description && e.description.includes("https://")) {
+      downloadHTML = `<a class="download-btn" href="${e.description}" target="_blank">Download</a>`;
+    }
+
+    item.innerHTML = `
+      <div>
+        <strong>${e.title}</strong>
+        <div class="event-date">${e.dateObj.toDateString()}</div>
+      </div>
+      ${downloadHTML}
+    `;
+
+    container.appendChild(item);
+  });
+}
+
+// Load Fun Facts from Calendar
+loadFunFacts();
+</script>
+
+</body>
+</html>
