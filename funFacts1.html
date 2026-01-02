@@ -188,9 +188,7 @@ function renderFunFacts(events) {
 
     let downloadHTML = "";
     if (e.description) {
-      // Remove spaces and line breaks to fix cut-off URLs
-      const cleanDesc = e.description.replace(/\s+/g, "");
-      const urlMatch = cleanDesc.match(/https?:\/\/[^\s]+/);
+      cont urlMatch = e.description.match(/https?:\/\/[^\s]+/);
       if (urlMatch) {
         const safeUrl = urlMatch[0];
         downloadHTML = `<a class="download-btn" href="${safeUrl}" target="_blank">Download</a>`;
@@ -216,6 +214,7 @@ loadFunFacts();
 
 </body>
 </html>
+
 
 
 
