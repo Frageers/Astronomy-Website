@@ -186,7 +186,7 @@
 
     async function loadCalendar() {
       try {
-        const res = await fetch("/api/funfacts");
+        const res = await fetch("/api/funfacts.js");
         const events = await res.json();
 
         // Convert ISO strings back to Date objects
@@ -235,3 +235,4 @@
 
 </body>
 </html>
+
