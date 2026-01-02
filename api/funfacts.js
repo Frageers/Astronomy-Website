@@ -1,4 +1,4 @@
-const ICS_LINK = "https://calendar.google.com/https://calendar.google.com/calendar/ical/c_8da90cdf9cf1b07e9815d4bba4e4b1f7fd75249e5cbfe10266d292d5fac6d484%40group.calendar.google.com/public/basic.ics/ical/c_8da90cdf9cf1b07e9815d4bba4e4b1f7fd75249e5cbfe10266d292d5fac6d484%40group.calendar.google.com/public/basic.ics";
+const ICS_LINK = "https://calendar.google.com/calendar/ical/c_8da90cdf9cf1b07e9815d4bba4e4b1f7fd75249e5cbfe10266d292d5fac6d484%40group.calendar.google.com/public/basic.ics";
 
 function parseICS(data) {
   const lines = data.split("\n");
@@ -42,3 +42,4 @@ export default async function handler(req, res) {
     res.status(500).json({ error: "Failed to load events" });
   }
 }
+
