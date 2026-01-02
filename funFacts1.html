@@ -187,9 +187,15 @@ function renderFunFacts(events) {
     item.className = "funfact-item";
 
     let downloadHTML = "";
-    if (e.description && e.description.includes("https://")) {
-      downloadHTML = `<a class="download-btn" href="${e.description}" target="_blank">Download</a>`;
+    if (e.description) {
+      // Match the first URL in the description
+      const urlMatch = e.description.match(/https?:\/\/[^\s]+/);
+      if (urlMatch) {
+        const safeUrl = urlMatch[0];
+        downloadHTML = `<a class="download-btn" href="${safeUrl}" target="_blank">Download</a>`;
+      }
     }
+
 
     item.innerHTML = `
       <div>
@@ -209,5 +215,6 @@ loadFunFacts();
 
 </body>
 </html>
+
 
 
