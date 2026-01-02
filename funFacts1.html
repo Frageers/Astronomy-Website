@@ -174,39 +174,35 @@ function renderFunFacts(events) {
   const container = document.querySelector(".funfact-list");
   container.innerHTML = "";
 
-  // Filter only Fun Facts
-  const funFacts = events.filter(e => e.title.startsWith("[Fun Fact]"));
-
-  if (funFacts.length === 0) {
+  if (events.length === 0) {
     container.innerHTML = "<div class='funfact-item'>No Fun Facts available.</div>";
     return;
   }
 
   // Sort by date ascending
-  funFacts.sort((a, b) => a.dateObj - b.dateObj);
+  events.sort((a,b) => a.dateObj - b.dateObj);
 
-  funFacts.forEach(e => {
+  events.forEach(e => {
     const item = document.createElement("div");
     item.className = "funfact-item";
 
     let downloadHTML = "";
     if (e.description) {
-      // Clean ICS folding breaks just in case
-      const cleanedDesc = e.description.replace(/\r?\n[ \t]/g, "");
-      // Grab the first URL
-      const urlMatch = cleanedDesc.match(/https?:\/\/[^\s]+/);
+      // Match the first URL in the description
+      const urlMatch = e.description.match(/https?:\/\/[^\s]+/);
       if (urlMatch) {
-        const url = urlMatch[0];
-        downloadHTML = `<a class="download-btn" href="${url}" target="_blank">Download</a>`;
+        const safeUrl = urlMatch[0];
+        downloadHTML = `<a class="download-btn" href="${safeUrl}" target="_blank">Download</a>`;
       }
     }
+
 
     item.innerHTML = `
       <div>
         <strong>${e.title}</strong>
         <div class="event-date">${e.dateObj.toDateString()}</div>
       </div>
-      ${downloadHTML || `<div class="event-date">${e.description}</div>`}
+      ${downloadHTML}
     `;
 
     container.appendChild(item);
@@ -219,9 +215,3 @@ loadFunFacts();
 
 </body>
 </html>
-
-
-
-
-
-
