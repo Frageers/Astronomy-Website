@@ -151,65 +151,23 @@
 </main>
 
 <script>
-const ICS_LINK = "https://calendar.google.com/calendar/ical/c_8da90cdf9cf1b07e9815d4bba4e4b1f7fd75249e5cbfe10266d292d5fac6d484%40group.calendar.google.com/public/basic.ics";
-const FETCH_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS_LINK) + "&cacheBust=" + new Date().getTime();
-
-const testFunFacts = [
-  {
-    title: "[Fun Fact] Why Saturn Has Rings",
-    dateObj: new Date("2025-11-17"),
-    description: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-  },
-  {
-    title: "[Fun Fact] The Moon's Craters",
-    dateObj: new Date("2025-11-18"),
-    description: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-  }
-];
-
-// Render immediately for testing
-renderFunFacts(testFunFacts);
-
 async function loadFunFacts() {
   try {
-    const res = await fetch(FETCH_URL);
-    const text = await res.text();
-    const events = parseICS(text);
+    // Fetch from your Vercel API
+    const res = await fetch("/api/funfacts");
+    const events = await res.json();
+
+    // Convert ISO strings back to Date objects
+    events.forEach(e => e.dateObj = new Date(e.dateObj));
 
     // Filter only Fun Facts
     const funFacts = events.filter(e => e.title.startsWith("[Fun Fact]"));
     renderFunFacts(funFacts);
   } catch (err) {
     console.error(err);
-    document.querySelector(".funfact-list").innerHTML = "<div class='funfact-item'>Failed to load fun facts.</div>";
+    document.querySelector(".funfact-list").innerHTML =
+      "<div class='funfact-item'>Failed to load fun facts.</div>";
   }
-}
-
-function parseICS(data) {
-  const lines = data.split("\n");
-  const events = [];
-  let current = null;
-
-  for (let line of lines) {
-    line = line.trim();
-    if (line === "BEGIN:VEVENT") current = {};
-    if (!current) continue;
-
-    if (line.startsWith("SUMMARY:")) current.title = line.replace("SUMMARY:", "");
-    if (line.startsWith("DTSTART")) current.date = line.split(":")[1];
-    if (line.startsWith("DESCRIPTION:")) current.description = line.replace("DESCRIPTION:", "");
-    if (line === "END:VEVENT" && current) {
-      current.dateObj = new Date(
-        current.date.substring(0,4),
-        current.date.substring(4,6)-1,
-        current.date.substring(6,8)
-      );
-      events.push(current);
-      current = null;
-    }
-  }
-
-  return events;
 }
 
 function renderFunFacts(events) {
@@ -245,10 +203,11 @@ function renderFunFacts(events) {
   });
 }
 
-// Load Fun Facts from Calendar
+// Load Fun Facts from Calendar API
 loadFunFacts();
 </script>
 
 </body>
 </html>
+
 
